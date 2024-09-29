@@ -1,0 +1,10 @@
+main: me.perotin.SimpleGroups
+name: SimpleGroups
+version: '1.0'
+description: A simple groups management plugin
+author: Perotin
+commands:
+  simplegroups:
+    aliases: sg
+    description: main simplegames command
+
