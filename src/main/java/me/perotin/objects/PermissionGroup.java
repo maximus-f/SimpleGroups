@@ -3,6 +3,7 @@ package me.perotin.objects;
 import lombok.Getter;
 import me.perotin.SimpleGroups;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,16 +31,36 @@ public class PermissionGroup {
     }
 
 
+    /**
+     *  Writes new permission to database and attaches new PermissionAttachment to all loaded
+     *  players.
+     * @param permission
+     * @param plugin
+     */
     public void addPermission(String permission, SimpleGroups plugin) {
         permissions.add(permission);
-        updatePermissionsForGroup(permission, plugin);
+        updatePermissionsForGroup(permission, plugin, true);
+        try {
+            plugin.getDatabaseManager().addPermissionForGroup(getName(), permission);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
+    public void removePermission(String permission, SimpleGroups plugin) {
+        permissions.remove(permission);
+        updatePermissionsForGroup(permission, plugin, false);
+        try {
+            plugin.getDatabaseManager().removePermissionForGroup(getName(), permission);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    private void updatePermissionsForGroup(String permission, SimpleGroups plugin) {
+    private void updatePermissionsForGroup(String permission, SimpleGroups plugin, boolean add) {
         for (SimplePlayer player : plugin.getPlayersWithRank(this)) {
-            player.setNewPermissions(plugin, permission);
+            player.updateNewPermission(plugin, permission, add);
         }
     }
 

@@ -53,18 +53,36 @@ public class SimplePlayer {
     }
 
     /**
-     * Sets new PermissionAttachment for given SimplePlayer object.
-     * Used when new permission is added only at run-time.
+     * Updates the PermissionAttachment for the given SimplePlayer object.
+     * Adds or removes a permission at runtime based on the provided value.
      *
-     * @param plugin
-     * @param permission
+     * @param plugin The instance of the plugin.
+     * @param permission The permission to add or remove.
+     * @param add If true, adds the permission; if false, removes it.
+     *
      */
-    public void setNewPermissions(SimpleGroups plugin, String permission) {
+    public void updateNewPermission(SimpleGroups plugin, String permission, boolean add) {
         if (Bukkit.getPlayer(playerUUID) != null) {
             Player p = Bukkit.getPlayer(playerUUID);
             PermissionAttachment attachment = p.addAttachment(plugin);
-            attachment.setPermission(permission, true);
+
+            if (add) {
+                attachment.setPermission(permission, true);
+            } else {
+                attachment.unsetPermission(permission);
+            }
+        } else {
+            // If not online when a change occurs, kick from memory so that
+            // when queried again will have accurate permissions.
+            // Note that this will probably cause issues with how PermissionAttachments are stored. Need to update
+            // accordingly.
+            unload(plugin);
         }
     }
+
+    private void unload(SimpleGroups plugin) {
+        plugin.getPlayers().remove(playerUUID);
+    }
+
 }
 

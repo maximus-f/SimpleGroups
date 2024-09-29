@@ -137,7 +137,8 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                         .replace("{group}", groupName)
                         .replace("{permission}", permission));
             } else {
-                if (group.getPermissions().remove(permission)) {
+                if (group.getPermissions().contains(permission)) {
+                    group.removePermission(permission, plugin);
                     commandSender.sendMessage(plugin.getConfig().getString("messages.permission-removed")
                             .replace("{group}", groupName)
                             .replace("{permission}", permission));

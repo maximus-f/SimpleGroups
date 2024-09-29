@@ -95,16 +95,30 @@ public class DatabaseManager {
     /**
      * Adds a new group to the database with a list of permissions.
      */
-    public void addGroup(PermissionGroup group) throws SQLException {
+    public void addPermissionForGroup(String group, String permission) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "INSERT INTO groups (group_name, permission) VALUES (?, ?)")) {
-            for (String permission : group.getPermissions()) {
-                statement.setString(1, group.getName());
-                statement.setString(2, permission);
-                statement.executeUpdate();
-            }
+           statement.setString(1, group);
+           statement.setString(2, permission);
+           statement.executeUpdate();
         }
     }
+
+
+
+    /**
+     * Adds a new group to the database with a list of permissions.
+     */
+    public void removePermissionForGroup(String group, String permission) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM groups WHERE group_name = ? AND permission = ?"
+        )) {
+            statement.setString(1, group);
+            statement.setString(2, permission);
+            statement.executeUpdate();
+        }
+    }
+
 
     /**
      * Checks if a group exists in the database.
