@@ -3,7 +3,9 @@ package me.perotin.objects;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @dateBegan 9/28/24
@@ -18,12 +20,12 @@ public class PermissionGroup {
 
     private String name;
     private String prefix;
-    private List<String> permissions;
+    private final Set<String> permissions; // Set to avoid duplicates
 
     public PermissionGroup(String name, String prefix) {
         this.name = name;
         this.prefix = prefix;
-        this.permissions = new ArrayList<>();
+        this.permissions = new HashSet<>();
     }
 
 
@@ -33,6 +35,10 @@ public class PermissionGroup {
 
     public boolean hasPermission(String permission) {
         return permissions.contains(permission) || permissions.contains("*");
+    }
+
+    public void addAllPermissions(List<String> permissions) {
+        this.permissions.addAll(permissions);
     }
 
 }

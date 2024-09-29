@@ -13,6 +13,16 @@ import java.util.UUID;
  *
  * Class to represent SQLite database to store groups and player permissions.
 
+ SCHEMAS:
+
+    Group_names (used as super list for getAll):
+        Group_Name:
+     Groups:
+        Group Name
+        Permission
+     Player_Groups:
+        UUID:
+        Group Name:
  */
 public class DatabaseManager {
     private final Connection connection;
@@ -21,20 +31,54 @@ public class DatabaseManager {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
 
         try (Statement statement = connection.createStatement()) {
-            // group creation
+            // store unique names
+            statement.execute("CREATE TABLE IF NOT EXISTS group_names (" +
+                    "group_name TEXT PRIMARY KEY" + // Unique group names
+                    ")");
+
+            // store permissions per group
             statement.execute("CREATE TABLE IF NOT EXISTS groups (" +
                     "group_name TEXT NOT NULL, " +
                     "permission TEXT NOT NULL, " +
-                    "PRIMARY KEY (group_name, permission))");
+                    "PRIMARY KEY (group_name, permission), " +
+                    "FOREIGN KEY (group_name) REFERENCES group_names(group_name) ON DELETE CASCADE" +
+                    ")");
 
-            // players of group
+            // store uuids with groups
             statement.execute("CREATE TABLE IF NOT EXISTS player_groups (" +
                     "uuid TEXT PRIMARY KEY, " +
                     "group_name TEXT NOT NULL, " +
-                    "FOREIGN KEY(group_name) REFERENCES groups(group_name))");
+                    "FOREIGN KEY (group_name) REFERENCES group_names(group_name) ON DELETE CASCADE" +
+                    ")");
         }
     }
 
+
+    /**
+     *  Fetch names through list of group names, then individually fetch all permissions per group
+     * @return All Permission groups
+     * @throws SQLException
+     */
+    public List<PermissionGroup> getAllPermissionGroups() throws SQLException {
+        List<PermissionGroup> permissionGroups = new ArrayList<>();
+        // Select all unique names from group_names
+        try (PreparedStatement groupNameStatement = connection.prepareStatement(
+                "SELECT group_name FROM group_names"
+        )) {
+            ResultSet groupNameResultSet = groupNameStatement.executeQuery();
+
+            while (groupNameResultSet.next()) {
+                String groupName = groupNameResultSet.getString("group_name");
+                // Fetch permissions per group
+                List<String> permissions = getGroupPermissions(groupName);
+                PermissionGroup permissionGroup = new PermissionGroup(groupName, "prefix_" + groupName);  // Assuming you handle prefix separately
+                permissionGroup.addAllPermissions(permissions);
+                permissionGroups.add(permissionGroup);
+            }
+        }
+
+        return permissionGroups;
+    }
     /**
      * Adds a new group to the database with a list of permissions.
      */
@@ -127,4 +171,5 @@ public class DatabaseManager {
             connection.close();
         }
     }
+
 }

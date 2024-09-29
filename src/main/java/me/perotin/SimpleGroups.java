@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,6 +30,7 @@ public class SimpleGroups extends JavaPlugin {
     @Getter
     private DatabaseManager databaseManager; // SQLite db
 
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -38,6 +40,7 @@ public class SimpleGroups extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SimpleJoinEvent(this), this);
         run();
     }
+
 
     @Override
     public void onDisable() {
@@ -53,18 +56,24 @@ public class SimpleGroups extends JavaPlugin {
 
 
 
-    // Sets permissions in case of a reload
-    private void run() {
+    // Load database, groups, set memory states for players
+    private void run()  {
+        // Instantiate db manager and default group
         try {
             if (!getDataFolder().exists()) {
                 getDataFolder().mkdirs();
             }
-
             databaseManager = new DatabaseManager(getDataFolder().getAbsolutePath() + "/database.db");
+           List<PermissionGroup> allGroups = databaseManager.getAllPermissionGroups();
+           for (PermissionGroup group : allGroups) {
+               groups.put(group.getName(), group);
+           }
         } catch (SQLException e) {
+            // Disable plugin if connection fail; hard requirement.
             e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
         }
+        // Sets permissions in case of a reload
         if (!Bukkit.getOnlinePlayers().isEmpty()) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 getPlayer(player.getUniqueId()).player.setPermissions(this);
