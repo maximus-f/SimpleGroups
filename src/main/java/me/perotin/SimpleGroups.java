@@ -10,19 +10,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
  TODO
-    Test. Currently viable to function but surely has errors.
  */
 public class SimpleGroups extends JavaPlugin {
 
     // Use Maps for faster #get retrievals
     private Map<String, PermissionGroup> groups;
+    @Getter
     private Map<UUID, SimplePlayer> players;
 
     @Getter
@@ -37,6 +35,7 @@ public class SimpleGroups extends JavaPlugin {
         getCommand("simplegroups").setExecutor(new SimpleGroupsCommand(this));
         getServer().getPluginManager().registerEvents(new SimpleJoinEvent(this), this);
         run();
+        // TODO: Add code here to function with /reload commands (players found on start up)
     }
 
 
@@ -80,12 +79,7 @@ public class SimpleGroups extends JavaPlugin {
             e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
         }
-        // Sets permissions in case of a reload
-//        if (!Bukkit.getOnlinePlayers().isEmpty()) {
-//            for (Player player : Bukkit.getOnlinePlayers()) {
-//                getPlayer(player.getUniqueId()).get().player.setPermissions(this);
-//            }
-//        }
+
     }
 
     public void addGroup(PermissionGroup group, boolean isNew) {
@@ -113,6 +107,19 @@ public class SimpleGroups extends JavaPlugin {
         groups.put("default", defaultGroup);
         databaseManager.writeNewGroup(defaultGroup);
     }
+
+    /**
+     * Retrieve all players part of a specified PermissionGroup.
+     *
+     * @param group
+     * @return List of SimplePlayer objects part of a PermissionGroup
+     */
+    public List<SimplePlayer> getPlayersWithRank(PermissionGroup group) {
+        return players.values().stream()
+                .filter(player -> group.getName().equalsIgnoreCase(player.getGroup().getName()))
+                .collect(Collectors.toList());
+    }
+
 
 
     public PermissionGroup getGroup(String name) {

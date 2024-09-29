@@ -37,6 +37,11 @@ public class SimplePlayer {
         return isTemporary() && System.currentTimeMillis() > expirationTime;
     }
 
+    /**
+     * Sets PermissionAttachments for all permissions of given SimplePlayer obj.
+     * Used on start-up and loading for first time.
+     * @param plugin
+     */
     public void setPermissions(SimpleGroups plugin){
         if (Bukkit.getPlayer(playerUUID) != null) {
             Player p = Bukkit.getPlayer(playerUUID);
@@ -44,6 +49,21 @@ public class SimplePlayer {
            for (String permission : group.getPermissions()) {
                attachment.setPermission(permission, true);
            }
+        }
+    }
+
+    /**
+     * Sets new PermissionAttachment for given SimplePlayer object.
+     * Used when new permission is added only at run-time.
+     *
+     * @param plugin
+     * @param permission
+     */
+    public void setNewPermissions(SimpleGroups plugin, String permission) {
+        if (Bukkit.getPlayer(playerUUID) != null) {
+            Player p = Bukkit.getPlayer(playerUUID);
+            PermissionAttachment attachment = p.addAttachment(plugin);
+            attachment.setPermission(permission, true);
         }
     }
 }

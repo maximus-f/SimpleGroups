@@ -1,6 +1,7 @@
 package me.perotin.objects;
 
 import lombok.Getter;
+import me.perotin.SimpleGroups;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,9 +30,19 @@ public class PermissionGroup {
     }
 
 
-    public void addPermission(String permission) {
+    public void addPermission(String permission, SimpleGroups plugin) {
         permissions.add(permission);
+        updatePermissionsForGroup(permission, plugin);
+
     }
+
+
+    private void updatePermissionsForGroup(String permission, SimpleGroups plugin) {
+        for (SimplePlayer player : plugin.getPlayersWithRank(this)) {
+            player.setNewPermissions(plugin, permission);
+        }
+    }
+
 
     public boolean hasPermission(String permission) {
         return permissions.contains(permission) || permissions.contains("*");

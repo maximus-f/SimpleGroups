@@ -17,3 +17,7 @@ messages:
   player-not-online: "Player {player} is not online."
   player-added: "{player} has been added to group {group}."
   unknown-command: "Unknown command. Use /sg create or /sg setplayer."
+  usage-setpermission: "Usage: /sg setpermission <group> <permission> <optional: true/false>"
+  permission-added: "Permission {permission} has been added to group {group}."
+  permission-removed: "Permission {permission} has been removed from group {group}."
+  permission-not-found: "Permission {permission} not found in group {group}."
