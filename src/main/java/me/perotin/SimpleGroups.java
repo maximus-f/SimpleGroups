@@ -7,7 +7,6 @@ import me.perotin.events.SimpleJoinEvent;
 import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /*
  TODO
@@ -54,8 +52,6 @@ public class SimpleGroups extends JavaPlugin {
     }
 
 
-
-
     // Load database, groups, set memory states for players
     private void run()  {
         // Instantiate db manager and default group
@@ -64,29 +60,58 @@ public class SimpleGroups extends JavaPlugin {
                 getDataFolder().mkdirs();
             }
             databaseManager = new DatabaseManager(getDataFolder().getAbsolutePath() + "/database.db");
-           List<PermissionGroup> allGroups = databaseManager.getAllPermissionGroups();
-           for (PermissionGroup group : allGroups) {
-               groups.put(group.getName(), group);
-           }
+
+            // Load all groups from the database
+            List<PermissionGroup> allGroups = databaseManager.getAllPermissionGroups();
+            boolean defaultNotFound = true;
+
+            for (PermissionGroup group : allGroups) {
+                groups.put(group.getName(), group);
+                if (group.getName().equalsIgnoreCase("default")) {
+                    defaultNotFound = false;
+                }
+            }
+
+            if (defaultNotFound) {
+                createAndAddDefaultGroup();
+            }
         } catch (SQLException e) {
             // Disable plugin if connection fail; hard requirement.
             e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
         }
         // Sets permissions in case of a reload
-        if (!Bukkit.getOnlinePlayers().isEmpty()) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                getPlayer(player.getUniqueId()).player.setPermissions(this);
+//        if (!Bukkit.getOnlinePlayers().isEmpty()) {
+//            for (Player player : Bukkit.getOnlinePlayers()) {
+//                getPlayer(player.getUniqueId()).get().player.setPermissions(this);
+//            }
+//        }
+    }
+
+    public void addGroup(PermissionGroup group, boolean isNew) {
+        groups.put(group.getName(), group);
+        if (isNew) {
+            // Write to database
+            try {
+                databaseManager.writeNewGroup(group);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
-    public void addGroup(PermissionGroup group) {
-        groups.put(group.getName(), group);
-    }
-
     public void removeGroup(PermissionGroup group) {
         groups.remove(group.getName());
+    }
+
+    /**
+     * Creates the default group and adds it to the database and memory.
+     * This function is called when the default group is not found in the database.
+     */
+    private void createAndAddDefaultGroup() throws SQLException {
+        PermissionGroup defaultGroup = new PermissionGroup("default", getConfig().getString("default-prefix", "[Default] "));
+        groups.put("default", defaultGroup);
+        databaseManager.writeNewGroup(defaultGroup);
     }
 
 
@@ -95,52 +120,57 @@ public class SimpleGroups extends JavaPlugin {
     }
 
     /**
-     * Checks memory for object, then database, then creates newly if none found.
-     * Returns true if previously in memory and permissions do not need to be set, false if otherwise.
+     * Asynchronously retrieves a player from memory or the database.
+     * If the player is found in memory, the callback is executed immediately.
+     * If not found, an asynchronous database query is made, and the result is passed to the callback on the main thread.
      *
-     * @param uuid
-     * @return player object always
-     *
-     * TODO May need to use a Future Callback here instead of AtomicReference. But ok for now.
+     * @param uuid The UUID of the player to retrieve.
+     * @param callback The callback to handle the retrieved player.
      */
-    public Pair getPlayer(UUID uuid) {
+    public void getPlayer(UUID uuid, PlayerCallback callback) {
+        // If the player is already in memory, invoke the callback immediately
         if (players.containsKey(uuid)) {
-            return new Pair(players.get(uuid), false);
+            callback.onResult(players.get(uuid), true);
         } else {
-            AtomicReference<SimplePlayer> player = new AtomicReference<>();
+            // Run the database task asynchronously
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                SimplePlayer simplePlayer;
+                boolean fromMemory = false;
+
                 try {
-
                     String group = getDatabaseManager().getPlayerGroup(uuid);
-                    if (group == null) {
-                        // Not in database, assert as default
-                        getDatabaseManager().assignPlayerToGroup(uuid, "default");
-                         player.set(new SimplePlayer(uuid, getGroup("default"), -1));;
-                    } else {
-                        // Pull from database.
-                         player.set(new SimplePlayer(uuid, getGroup(group), -1));
 
+                    if (group == null) {
+                        // Player not found in the database, assign to default group
+                        getDatabaseManager().assignPlayerToGroup(uuid, "default");
+                        simplePlayer = new SimplePlayer(uuid, getGroup("default"), -1);
+                    } else {
+                        // Player found in the database, assign to the retrieved group
+                        simplePlayer = new SimplePlayer(uuid, getGroup(group), -1);
                     }
+
+                    players.put(uuid, simplePlayer);
+
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    return;
                 }
+
+                // Return callback on main thread
+                Bukkit.getScheduler().runTask(this, () -> callback.onResult(simplePlayer, fromMemory));
             });
-            return new Pair(player.get(), false);
         }
     }
+
 
     public void addPlayer(SimplePlayer player) {
         players.put(player.getPlayerUUID(), player);
     }
 
-    public static class Pair {
-        public final SimplePlayer player;
-        public final boolean loaded;
-        public Pair(SimplePlayer x, boolean y) {
-            this.player = x;
-            this.loaded = y;
-        }
+    public interface PlayerCallback {
+        void onResult(SimplePlayer player, boolean fromMemory);
     }
+
 
 
 }

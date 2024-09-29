@@ -33,8 +33,8 @@ public class DatabaseManager {
         try (Statement statement = connection.createStatement()) {
             // store unique names
             statement.execute("CREATE TABLE IF NOT EXISTS group_names (" +
-                    "group_name TEXT PRIMARY KEY" + // Unique group names
-                    ")");
+                    "group_name TEXT PRIMARY KEY," + // Unique group names
+                    "group_prefix TEXT NOT NULL)");
 
             // store permissions per group
             statement.execute("CREATE TABLE IF NOT EXISTS groups (" +
@@ -54,6 +54,19 @@ public class DatabaseManager {
     }
 
 
+    /**
+     *  Writes newly created group to groups_name database before permissions are added
+     * @param group
+     * @throws SQLException
+     */
+    public void writeNewGroup(PermissionGroup group) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO group_names(group_name, group_prefix) VALUES(?, ?)")) {
+            statement.setString(1, group.getName());
+            statement.setString(2, group.getPrefix());
+            statement.executeUpdate();
+
+        }
+    }
     /**
      *  Fetch names through list of group names, then individually fetch all permissions per group
      * @return All Permission groups
@@ -98,7 +111,7 @@ public class DatabaseManager {
      */
     public boolean groupExists(String groupName) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM groups WHERE group_name = ?")) {
+                "SELECT * FROM group_names WHERE group_name = ?")) {
             statement.setString(1, groupName);
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();

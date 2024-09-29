@@ -11,8 +11,12 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 
+/*
+    Base command class for /simplegroups
+ */
 public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
 
 
@@ -39,32 +43,32 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             // Display current group for the player
             UUID playerUUID = ((Player) commandSender).getUniqueId(); // Safe to cast
-            SimpleGroups.Pair pair = plugin.getPlayer(playerUUID);
-            SimplePlayer simplePlayer = pair.player;
-            if (simplePlayer != null && !simplePlayer.isExpired()) {
-                commandSender.sendMessage(plugin.getConfig().getString("messages.current-group")
-                        .replace("{group}", simplePlayer.getGroup().getName())
-                        .replace("{time}", simplePlayer.isTemporary()
-                                ? (simplePlayer.getExpirationTime() - System.currentTimeMillis()) + "ms"
-                                : plugin.getConfig().getString("messages.no-time")));
-            } else {
-                commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
-            }
+
+            plugin.getPlayer(playerUUID, (simplePlayer, fromMemory) -> {
+                if (simplePlayer != null && !simplePlayer.isExpired()) {
+                    commandSender.sendMessage(plugin.getConfig().getString("messages.current-group")
+                            .replace("{group}", simplePlayer.getGroup().getName())
+                            .replace("{time}", simplePlayer.isTemporary()
+                                    ? (simplePlayer.getExpirationTime() - System.currentTimeMillis()) + "ms"
+                                    : plugin.getConfig().getString("messages.no-time")));
+                } else {
+                    commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
+                }
+            });
             return true;
         }
 
         if (args[0].equalsIgnoreCase("create") && (commandSender.isOp() || commandSender.hasPermission("simplegroups.admin"))) {
-          // Create Group
             if (args.length < 2) {
                 commandSender.sendMessage(plugin.getConfig().getString("messages.usage-create"));
                 return false;
             }
 
             String groupName = args[1];
-            String inheritGroup = args.length > 2 ? args[2] : null; // Optional inherit, implement later
+            String inheritGroup = args.length > 2 ? args[2] : null; // Optional inherit
             PermissionGroup newGroup = new PermissionGroup(groupName, "prefix_" + groupName); // Assign a prefix
 
-            plugin.addGroup(newGroup);
+            plugin.addGroup(newGroup, true);
             commandSender.sendMessage(plugin.getConfig().getString("messages.group-created")
                     .replace("{group}", groupName));
             return true;
@@ -86,25 +90,31 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            Player targetPlayer = Bukkit.getPlayer(playerName);
-            if (targetPlayer == null) {
-                commandSender.sendMessage(plugin.getConfig().getString("messages.player-not-online")
-                        .replace("{player}", playerName));
-                return true;
-            }
+            // Run async task for setting another player's group
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                Player targetPlayer = Bukkit.getPlayer(playerName);
+                if (targetPlayer == null) {
+                    Bukkit.getScheduler().runTask(plugin, () -> commandSender.sendMessage(plugin.getConfig().getString("messages.player-not-online")
+                            .replace("{player}", playerName)));
+                    return;
+                }
 
-            UUID playerUUID = targetPlayer.getUniqueId();
-            SimplePlayer simplePlayer = new SimplePlayer(playerUUID, group, 0); // No expiration for now
-            plugin.addPlayer(simplePlayer);
-            commandSender.sendMessage(plugin.getConfig().getString("messages.player-added")
-                    .replace("{player}", playerName)
-                    .replace("{group}", groupName));
+                UUID playerUUID = targetPlayer.getUniqueId();
+                SimplePlayer simplePlayer = new SimplePlayer(playerUUID, group, 0); // No expiration for now
+                plugin.addPlayer(simplePlayer);
+
+                // Run on the main thread to send the message back
+                Bukkit.getScheduler().runTask(plugin, () -> commandSender.sendMessage(plugin.getConfig().getString("messages.player-added")
+                        .replace("{player}", playerName)
+                        .replace("{group}", groupName)));
+            });
             return true;
         }
 
         commandSender.sendMessage(plugin.getConfig().getString("messages.unknown-command"));
         return false;
     }
+
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

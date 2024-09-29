@@ -20,13 +20,10 @@ public class SimpleJoinEvent implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
-        SimpleGroups.Pair player = plugin.getPlayer(joiner.getUniqueId()); // Should handle all cases in #getPlayer
-
-        // Set permissions if not previously found in memory (meaning not been set yet)
-        if (player != null) {
-            if (!player.loaded) {
-                player.player.setPermissions(plugin);
+        plugin.getPlayer(joiner.getUniqueId(), (simplePlayer, fromMemory) -> {
+            if (!fromMemory) {
+                simplePlayer.setPermissions(plugin);
             }
-        }
+        });
     }
 }
