@@ -1,6 +1,7 @@
 package me.perotin.objects;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.perotin.SimpleGroups;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,18 +21,32 @@ import java.util.UUID;
 public class SimplePlayer {
 
     private UUID playerUUID;
+    @Setter
+    private PermissionAttachment permissionAttachment;
     private final PermissionGroup group;
     private final long expirationTime;
 
+
+    /**
+     * Offline player constructor
+     */
     public SimplePlayer(UUID playerUUID, PermissionGroup group, long expirationTime) {
         this.playerUUID = playerUUID;
         this.group = group;
         this.expirationTime = expirationTime;
     }
 
+    public SimplePlayer(UUID playerUUID, PermissionGroup group, long expirationTime, PermissionAttachment permissionAttachment) {
+        this.playerUUID = playerUUID;
+        this.group = group;
+        this.expirationTime = expirationTime;
+        this.permissionAttachment = permissionAttachment;
+    }
+
     public boolean isTemporary() {
         return expirationTime > 0;
     }
+
 
     public boolean isExpired() {
         return isTemporary() && System.currentTimeMillis() > expirationTime;
@@ -45,10 +60,12 @@ public class SimplePlayer {
     public void setPermissions(SimpleGroups plugin){
         if (Bukkit.getPlayer(playerUUID) != null) {
             Player p = Bukkit.getPlayer(playerUUID);
-           PermissionAttachment attachment =  p.addAttachment(plugin);
-           for (String permission : group.getPermissions()) {
-               attachment.setPermission(permission, true);
-           }
+            if (p != null) {
+                PermissionAttachment attachment = p.addAttachment(plugin);
+                for (String permission : group.getPermissions()) {
+                    attachment.setPermission(permission, true);
+                }
+            }
         }
     }
 
@@ -62,20 +79,19 @@ public class SimplePlayer {
      *
      */
     public void updateNewPermission(SimpleGroups plugin, String permission, boolean add) {
-        if (Bukkit.getPlayer(playerUUID) != null) {
-            Player p = Bukkit.getPlayer(playerUUID);
-            PermissionAttachment attachment = p.addAttachment(plugin);
-
-            if (add) {
-                attachment.setPermission(permission, true);
-            } else {
-                attachment.unsetPermission(permission);
+        PermissionAttachment attachment = getPermissionAttachment();
+            if (attachment != null) {
+                if (add) {
+                    attachment.setPermission(permission, true);
+                } else {
+                    attachment.unsetPermission(permission);
             }
         } else {
-            // If not online when a change occurs, kick from memory so that
-            // when queried again will have accurate permissions.
-            // Note that this will probably cause issues with how PermissionAttachments are stored. Need to update
-            // accordingly.
+            /*
+                PermissionAttachment is set on join. If this occurs, then it means that the SimplePlayer object is
+                loaded without the Player object ever having been loaded. This theoretically should never occur, but in
+                case it does, unload current object so that it will be loaded correctly next time.
+             */
             unload(plugin);
         }
     }

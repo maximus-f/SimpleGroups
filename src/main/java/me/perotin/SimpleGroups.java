@@ -7,6 +7,8 @@ import me.perotin.events.SimpleJoinEvent;
 import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -151,13 +153,18 @@ public class SimpleGroups extends JavaPlugin {
                         // Player not found in the database, assign to default group
                         getDatabaseManager().assignPlayerToGroup(uuid, "default");
                         simplePlayer = new SimplePlayer(uuid, getGroup("default"), -1);
+
                     } else {
                         // Player found in the database, assign to the retrieved group
-                        simplePlayer = new SimplePlayer(uuid, getGroup(group), -1);
+                        simplePlayer = new SimplePlayer(uuid, getGroup(group), -1 );
                     }
-
+                    // If player is not null, add attachment if null
+                    Player targ = Bukkit.getPlayer(uuid);
+                    if (targ != null && simplePlayer.getPermissionAttachment() == null) {
+                        PermissionAttachment attachment = targ.addAttachment(this);
+                        simplePlayer.setPermissionAttachment(attachment);
+                    }
                     players.put(uuid, simplePlayer);
-
                 } catch (SQLException e) {
                     e.printStackTrace();
                     return;

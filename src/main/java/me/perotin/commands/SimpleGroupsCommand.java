@@ -103,7 +103,7 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                 }
 
                 UUID playerUUID = targetPlayer.getUniqueId();
-                SimplePlayer simplePlayer = new SimplePlayer(playerUUID, group, 0); // No expiration for now
+                SimplePlayer simplePlayer = new SimplePlayer(playerUUID, group, 0, targetPlayer.addAttachment(plugin)); // No expiration for now
                 plugin.addPlayer(simplePlayer);
 
                 // Run on the main thread to send the message back
