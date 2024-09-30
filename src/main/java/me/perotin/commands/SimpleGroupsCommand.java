@@ -64,11 +64,16 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
 
             plugin.getPlayer(playerUUID, (simplePlayer, fromMemory) -> {
                 if (simplePlayer != null && !simplePlayer.isExpired()) {
+                    long timeRemaining = simplePlayer.isTemporary()
+                            ? (simplePlayer.getExpirationTime() - System.currentTimeMillis())
+                            : -1;
+
+                    String timeRemainingString = timeRemaining > 0 ? formatTime(timeRemaining) : plugin.getConfig().getString("messages.no-time");
+
                     commandSender.sendMessage(plugin.getConfig().getString("messages.current-group")
                             .replace("{group}", simplePlayer.getGroup().getName())
-                            .replace("{time}", simplePlayer.isTemporary()
-                                    ? (simplePlayer.getExpirationTime() - System.currentTimeMillis()) + "ms"
-                                    : plugin.getConfig().getString("messages.no-time")));
+                            .replace("{time}", timeRemainingString));
+
                 } else {
                     commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
                 }
@@ -99,6 +104,32 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         commandSender.sendMessage(plugin.getConfig().getString("messages.unknown-command"));
         return false;
     }
+
+    // Format time excluding 0 values
+    private String formatTime(long millis) {
+        long seconds = millis / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+
+        seconds %= 60;
+        minutes %= 60;
+        hours %= 24;
+
+        StringBuilder formattedTime = new StringBuilder();
+
+        if (days > 0) formattedTime.append(days).append(" days, ");
+        if (hours > 0) formattedTime.append(hours).append(" hours, ");
+        if (minutes > 0) formattedTime.append(minutes).append(" minutes, ");
+        if (seconds > 0) formattedTime.append(seconds).append(" seconds");
+
+        // Remove trailing commas and spaces
+        if (formattedTime.length() > 2 && formattedTime.charAt(formattedTime.length() - 2) == ',') {
+            formattedTime.setLength(formattedTime.length() - 2);
+        }
+        return formattedTime.toString();
+    }
+
 
 
     @Override

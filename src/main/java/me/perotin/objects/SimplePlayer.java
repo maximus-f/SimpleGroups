@@ -58,7 +58,7 @@ public class SimplePlayer {
         }
         setPermissions(plugin);
         try {
-            plugin.getDatabaseManager().assignPlayerToGroup(getPlayerUUID(), group.getName());
+            plugin.getDatabaseManager().assignPlayerToGroup(getPlayerUUID(), group.getName(), expirationTime);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

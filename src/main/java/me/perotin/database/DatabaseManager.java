@@ -44,12 +44,14 @@ public class DatabaseManager {
                     "FOREIGN KEY (group_name) REFERENCES group_names(group_name) ON DELETE CASCADE" +
                     ")");
 
-            // store uuids with groups
+            // store UUIDs with groups and expiration times, -1 if permanent
             statement.execute("CREATE TABLE IF NOT EXISTS player_groups (" +
                     "uuid TEXT PRIMARY KEY, " +
                     "group_name TEXT NOT NULL, " +
+                    "expiration_time LONG DEFAULT -1, " +
                     "FOREIGN KEY (group_name) REFERENCES group_names(group_name) ON DELETE CASCADE" +
                     ")");
+
         }
     }
 
@@ -182,15 +184,16 @@ public class DatabaseManager {
     /**
      * Adds a player to a group in the player_groups table.
      */
-    public void assignPlayerToGroup(UUID uuid, String groupName) throws SQLException {
+    public void assignPlayerToGroup(UUID uuid, String groupName, long time) throws SQLException {
         if (!groupExists(groupName)) {
             throw new SQLException("Group " + groupName + " does not exist.");
         }
 
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT OR REPLACE INTO player_groups (uuid, group_name) VALUES (?, ?)")) {
+                "INSERT OR REPLACE INTO player_groups (uuid, group_name) VALUES (?, ?, ?)")) {
             statement.setString(1, uuid.toString());
             statement.setString(2, groupName);
+            statement.setLong(3, time);
             statement.executeUpdate();
         }
     }

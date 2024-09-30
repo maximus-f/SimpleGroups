@@ -164,7 +164,7 @@ public class SimpleGroups extends JavaPlugin {
 
                     if (group == null) {
                         // Player not found in the database, assign to default group
-                        getDatabaseManager().assignPlayerToGroup(uuid, "default");
+                        getDatabaseManager().assignPlayerToGroup(uuid, "default", -1);
                         simplePlayer = new SimplePlayer(uuid, getGroup("default"), -1);
 
                     } else {
