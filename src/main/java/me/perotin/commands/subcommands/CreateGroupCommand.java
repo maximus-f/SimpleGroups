@@ -20,7 +20,7 @@ public class CreateGroupCommand implements SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(plugin.getConfig().getString("messages.usage-create"));
+            sender.sendMessage(plugin.getMessage("messages.usage-create"));
             return;
         }
 
@@ -29,6 +29,6 @@ public class CreateGroupCommand implements SubCommand {
         PermissionGroup newGroup = new PermissionGroup(groupName, prefix);
 
         plugin.addGroup(newGroup, true);
-        sender.sendMessage(plugin.getConfig().getString("messages.group-created").replace("{group}", groupName));
+        sender.sendMessage(plugin.getMessage("messages.group-created").replace("{group}", groupName));
     }
 }

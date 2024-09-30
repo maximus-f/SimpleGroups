@@ -23,7 +23,7 @@ public class SetPermissionSubCommand implements SubCommand {
     @Override
     public void execute(CommandSender commandSender, String[] args) {
         if (args.length < 3) {
-            commandSender.sendMessage(plugin.getConfig().getString("messages.usage-setpermission"));
+            commandSender.sendMessage(plugin.getMessage("messages.usage-setpermission"));
             return;
         }
 
@@ -33,7 +33,7 @@ public class SetPermissionSubCommand implements SubCommand {
 
         PermissionGroup group = plugin.getGroup(groupName);
         if (group == null) {
-            commandSender.sendMessage(plugin.getConfig().getString("messages.group-not-exist")
+            commandSender.sendMessage(plugin.getMessage("messages.group-not-exist")
                     .replace("{group}", groupName));
             return;
         }
@@ -41,17 +41,17 @@ public class SetPermissionSubCommand implements SubCommand {
         if (value) {
             // Add permission to the group
             group.addPermission(permission, plugin);
-            commandSender.sendMessage(plugin.getConfig().getString("messages.permission-added")
+            commandSender.sendMessage(plugin.getMessage("messages.permission-added")
                     .replace("{group}", groupName)
                     .replace("{permission}", permission));
         } else {
             if (group.getPermissions().contains(permission)) {
                 group.removePermission(permission, plugin);
-                commandSender.sendMessage(plugin.getConfig().getString("messages.permission-removed")
+                commandSender.sendMessage(plugin.getMessage("messages.permission-removed")
                         .replace("{group}", groupName)
                         .replace("{permission}", permission));
             } else {
-                commandSender.sendMessage(plugin.getConfig().getString("messages.permission-not-found")
+                commandSender.sendMessage(plugin.getMessage("messages.permission-not-found")
                         .replace("{permission}", permission)
                         .replace("{group}", groupName));
             }

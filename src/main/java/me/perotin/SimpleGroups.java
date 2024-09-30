@@ -9,10 +9,13 @@ import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,10 +33,16 @@ public class SimpleGroups extends JavaPlugin {
     @Getter
     private DatabaseManager databaseManager; // SQLite db
 
+    @Getter
+    private FileConfiguration messagesConfig;
+    @Getter
+    private String lang;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        this.lang = getConfig().getString("lang");
+        loadMessages();
         players = new HashMap<>();
         groups = new HashMap<>();
         getCommand("simplegroups").setExecutor(new SimpleGroupsCommand(this));
@@ -56,6 +65,16 @@ public class SimpleGroups extends JavaPlugin {
         }
     }
 
+
+    private void loadMessages() {
+        File messagesFile = new File(getDataFolder(), "lang/" + lang+".yml"); // Change to desired locale
+
+        if (!messagesFile.exists()) {
+            saveResource("lang/"+lang+".yml", false);
+        }
+
+        messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
+    }
 
     // Load database, groups, set memory states for players
     private void run()  {
@@ -192,17 +211,12 @@ public class SimpleGroups extends JavaPlugin {
         }
     }
 
-
-    public void addPlayer(SimplePlayer player) {
-        players.put(player.getPlayerUUID(), player);
-    }
-
     public interface PlayerCallback {
         void onResult(SimplePlayer player, boolean fromMemory);
     }
 
     public String getMessage(String path) {
-        return ChatColor.translateAlternateColorCodes('&', getConfig().getString(path, "Messages not found in SimpleGroups/config.yml"));
+        return ChatColor.translateAlternateColorCodes('&', messagesConfig.getString(path, "Null text found for: " + path));
     }
 
 

@@ -28,7 +28,7 @@ public class SetPlayerGroupCommand implements SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(Objects.requireNonNull(plugin.getConfig().getString("messages.usage-setplayer")));
+            sender.sendMessage(Objects.requireNonNull(plugin.getMessage("messages.usage-setplayer")));
             return;
         }
 
@@ -37,7 +37,7 @@ public class SetPlayerGroupCommand implements SubCommand {
         PermissionGroup group = plugin.getGroup(groupName);
 
         if (group == null) {
-            sender.sendMessage(plugin.getConfig().getString("messages.group-not-exist")
+            sender.sendMessage(plugin.getMessage("messages.group-not-exist")
                     .replace("{group}", groupName));
             return;
         }
@@ -57,7 +57,7 @@ public class SetPlayerGroupCommand implements SubCommand {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Player targetPlayer = Bukkit.getPlayer(playerName);
             if (targetPlayer == null) {
-                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getConfig().getString("messages.player-not-online")
+                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getMessage("messages.player-not-online")
                         .replace("{player}", playerName)));
                 return;
             }
@@ -72,7 +72,7 @@ public class SetPlayerGroupCommand implements SubCommand {
             });
 
             // Run on the main thread to send the message back
-            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getConfig().getString("messages.player-added")
+            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getMessage("messages.player-added")
                     .replace("{player}", playerName)
                     .replace("{group}", groupName)));
         });

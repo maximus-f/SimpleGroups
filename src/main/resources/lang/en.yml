@@ -1,12 +1,3 @@
-# SimpleGroups by Perotin
-
-
-default-prefix: "&7[Default]&f "
-# Supported languages: en, de
-lang: "de"
-
-join-message: "{prefix} {name} has joined the server!"
-
 messages:
   only-players: "Only players can use this command."
   current-group: "Your current group: {group}, Time remaining: {time}"

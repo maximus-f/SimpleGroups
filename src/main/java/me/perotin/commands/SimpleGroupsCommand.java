@@ -47,14 +47,15 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         Command layout : /simplegroups /sg
         /sg create <group-name> <optional: inherit> <optional: name> - Create group, simplegroups.admin
         /sg setpermission <group> <permission> <optional: true/false> - Set group permission, simplegroup.admin
-        /sg setplayer <group-name> <player-name> - Add player to group, simplegroup.admin
+        /sg setplayer <group-name> <player-name> <optional: time> - Add player to group, simplegroup.admin
+        /sg deletegroup <group>
         /sg - Displays current group and time remaining if applicable, no permission
 
      */
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (!(commandSender instanceof Player) && args.length == 0) {
-            commandSender.sendMessage(plugin.getConfig().getString("messages.only-players"));
+            commandSender.sendMessage(plugin.getMessage("messages.only-players"));
             return true;
         }
 
@@ -69,9 +70,9 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                             ? (simplePlayer.getExpirationTime() - System.currentTimeMillis())
                             : -1;
 
-                    String timeRemainingString = timeRemaining > 0 ? formatTime(timeRemaining) : plugin.getConfig().getString("messages.no-time");
+                    String timeRemainingString = timeRemaining > 0 ? formatTime(timeRemaining) : plugin.getMessage("messages.no-time");
 
-                    commandSender.sendMessage(plugin.getConfig().getString("messages.current-group")
+                    commandSender.sendMessage(plugin.getMessage("messages.current-group")
                             .replace("{group}", simplePlayer.getGroup().getName())
                             .replace("{time}", timeRemainingString));
 
@@ -82,7 +83,7 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                         simplePlayer.setGroup(plugin.getGroup("default"), player, plugin, -1);
                     }  else {
                         // This case should never happen but leaving it for now. Cleanup needed here most likely.
-                        commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
+                        commandSender.sendMessage(plugin.getMessage("messages.no-group"));
                     }
                 }
             });
@@ -109,7 +110,7 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         }
 
 
-        commandSender.sendMessage(plugin.getConfig().getString("messages.unknown-command"));
+        commandSender.sendMessage(plugin.getMessage("messages.unknown-command"));
         return false;
     }
 
