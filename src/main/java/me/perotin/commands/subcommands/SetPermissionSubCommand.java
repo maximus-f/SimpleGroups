@@ -9,6 +9,9 @@ import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+    Subcommand for setting a permission of a group
+ */
 public class SetPermissionSubCommand implements SubCommand {
 
     private final SimpleGroups plugin;

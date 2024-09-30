@@ -3,6 +3,7 @@ package me.perotin;
 import lombok.Getter;
 import me.perotin.commands.SimpleGroupsCommand;
 import me.perotin.database.DatabaseManager;
+import me.perotin.events.SignWriteEvent;
 import me.perotin.events.SimpleJoinEvent;
 import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
@@ -37,6 +38,8 @@ public class SimpleGroups extends JavaPlugin {
         groups = new HashMap<>();
         getCommand("simplegroups").setExecutor(new SimpleGroupsCommand(this));
         getServer().getPluginManager().registerEvents(new SimpleJoinEvent(this), this);
+        getServer().getPluginManager().registerEvents(new SignWriteEvent(this), this);
+
         run();
         // TODO: Add code here to function with /reload commands (players found on start up)
     }

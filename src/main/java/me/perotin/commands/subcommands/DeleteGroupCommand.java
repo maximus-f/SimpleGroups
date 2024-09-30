@@ -5,6 +5,9 @@ import me.perotin.commands.SubCommand;
 import me.perotin.objects.PermissionGroup;
 import org.bukkit.command.CommandSender;
 
+/*
+    Subcommand for deleting a group.
+ */
 public class DeleteGroupCommand implements SubCommand {
 
     private SimpleGroups plugin;

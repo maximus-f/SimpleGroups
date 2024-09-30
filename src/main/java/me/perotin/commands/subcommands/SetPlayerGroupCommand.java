@@ -14,6 +14,9 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+    Subcommand for setting a player's group.
+ */
 public class SetPlayerGroupCommand implements SubCommand {
 
     private final SimpleGroups plugin;
