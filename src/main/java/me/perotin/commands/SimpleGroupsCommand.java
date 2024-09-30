@@ -2,6 +2,7 @@ package me.perotin.commands;
 
 import me.perotin.SimpleGroups;
 import me.perotin.commands.subcommands.CreateGroupCommand;
+import me.perotin.commands.subcommands.DeleteGroupCommand;
 import me.perotin.commands.subcommands.SetPermissionSubCommand;
 import me.perotin.commands.subcommands.SetPlayerGroupCommand;
 import me.perotin.objects.PermissionGroup;
@@ -37,6 +38,8 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         subCommands.put("creategroup", new CreateGroupCommand(plugin));
         subCommands.put("setplayer", new SetPlayerGroupCommand(plugin));
         subCommands.put("setpermission", new SetPermissionSubCommand(plugin));
+        subCommands.put("deletegroup", new DeleteGroupCommand(plugin));
+
     }
 
 
@@ -85,6 +88,10 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         } if (args[0].equalsIgnoreCase("setpermission") && hasPerms) {
             // Set permission for a group
           subCommands.get("setpermission").execute(commandSender, args);
+            return true;
+        } if (args[0].equalsIgnoreCase("deletegroup") && hasPerms) {
+            // Set permission for a group
+            subCommands.get("deletegroup").execute(commandSender, args);
             return true;
         }
 

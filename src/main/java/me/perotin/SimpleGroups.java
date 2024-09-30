@@ -97,8 +97,20 @@ public class SimpleGroups extends JavaPlugin {
         }
     }
 
+    /**
+     *  Deletes group from memory and database. Sets all current users to default.
+     * @param group
+     */
     public void removeGroup(PermissionGroup group) {
+        // Reassign members in memory to default rank
+        getPlayersWithRank(group).forEach(simplePlayer -> simplePlayer.setGroup(getGroup("default"), Bukkit.getPlayer(simplePlayer.getPlayerUUID()), this));
         groups.remove(group.getName());
+
+        try {
+            databaseManager.deletePermissionGroup(group.getName());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

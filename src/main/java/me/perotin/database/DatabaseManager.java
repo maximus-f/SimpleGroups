@@ -94,6 +94,51 @@ public class DatabaseManager {
 
         return permissionGroups;
     }
+
+    /**
+     * Deletes a permission group and reassigns its members to the default group.
+     *
+     * @param groupName The name of the group to delete.
+     * @throws SQLException If the operation fails.
+     */
+    public void deletePermissionGroup(String groupName) throws SQLException {
+        if (!groupExists(groupName)) {
+            throw new SQLException("Group " + groupName + " does not exist.");
+        }
+
+        // Start transaction
+        connection.setAutoCommit(false);
+        try {
+            // Reassign members to default
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE player_groups SET group_name = 'default' WHERE group_name = ?")) {
+                statement.setString(1, groupName);
+                statement.executeUpdate();
+            }
+
+            // Delete instances in permissions table
+            try (PreparedStatement deletePermissions = connection.prepareStatement(
+                    "DELETE FROM groups WHERE group_name = ?")) {
+                deletePermissions.setString(1, groupName);
+                deletePermissions.executeUpdate();
+            }
+
+            // Delete instances in group name super list
+            try (PreparedStatement deleteGroupName = connection.prepareStatement(
+                    "DELETE FROM group_names WHERE group_name = ?")) {
+                deleteGroupName.setString(1, groupName);
+                deleteGroupName.executeUpdate();
+            }
+
+            // Commit the transaction
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
     /**
      * Adds a new group to the database with a list of permissions.
      */

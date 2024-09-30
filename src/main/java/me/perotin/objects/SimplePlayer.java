@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.perotin.SimpleGroups;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -46,7 +47,15 @@ public class SimplePlayer {
      */
     public void setGroup(PermissionGroup group, Player player, SimpleGroups plugin) {
         this.group = group;
-        player.removeAttachment(getPermissionAttachment());
+        if (player != null) {
+            player.removeAttachment(getPermissionAttachment());
+        } else {
+            /*
+                Can occur if group of offline player gets deleted. In this case, unload object
+                and let it be loaded next time.
+             */
+            unload(plugin);
+        }
         setPermissions(plugin);
         try {
             plugin.getDatabaseManager().assignPlayerToGroup(getPlayerUUID(), group.getName());
