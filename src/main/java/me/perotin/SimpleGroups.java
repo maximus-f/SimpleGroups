@@ -61,7 +61,7 @@ public class SimpleGroups extends JavaPlugin {
             if (!getDataFolder().exists()) {
                 getDataFolder().mkdirs();
             }
-            databaseManager = new DatabaseManager(getDataFolder().getAbsolutePath() + "/database.db");
+            databaseManager = new DatabaseManager(getDataFolder().getAbsolutePath() + "/database.db", this);
 
             // Load all groups from the database
             List<PermissionGroup> allGroups = databaseManager.getAllPermissionGroups();
@@ -169,7 +169,7 @@ public class SimpleGroups extends JavaPlugin {
 
                     } else {
                         // Player found in the database, assign to the retrieved group
-                        simplePlayer = new SimplePlayer(uuid, getGroup(group), -1 );
+                        simplePlayer = getDatabaseManager().loadPlayer(uuid.toString());
                     }
                     // If player is not null, add attachment if null
                     Player targ = Bukkit.getPlayer(uuid);

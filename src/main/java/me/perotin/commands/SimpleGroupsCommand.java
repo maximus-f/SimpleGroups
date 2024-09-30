@@ -60,7 +60,8 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
             // Display current group for the player
-            UUID playerUUID = ((Player) commandSender).getUniqueId(); // Safe to cast
+            UUID playerUUID = ((Player) commandSender).getUniqueId();
+            Player player = Bukkit.getPlayer(playerUUID);
 
             plugin.getPlayer(playerUUID, (simplePlayer, fromMemory) -> {
                 if (simplePlayer != null && !simplePlayer.isExpired()) {
@@ -75,7 +76,14 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                             .replace("{time}", timeRemainingString));
 
                 } else {
-                    commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
+                    if (simplePlayer.getGroup() != null && simplePlayer.isExpired()) {
+                        commandSender.sendMessage(plugin.getMessage("messages.expired-group")
+                                .replace("{group}", simplePlayer.getGroup().getName()));
+                        simplePlayer.setGroup(plugin.getGroup("default"), player, plugin, -1);
+                    }  else {
+                        // This case should never happen but leaving it for now. Cleanup needed here most likely.
+                        commandSender.sendMessage(plugin.getConfig().getString("messages.no-group"));
+                    }
                 }
             });
             return true;

@@ -1,6 +1,8 @@
 package me.perotin.database;
 
+import me.perotin.SimpleGroups;
 import me.perotin.objects.PermissionGroup;
+import me.perotin.objects.SimplePlayer;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
@@ -26,9 +28,11 @@ import java.util.UUID;
  */
 public class DatabaseManager {
     private final Connection connection;
+    private SimpleGroups plugin;
 
-    public DatabaseManager(String path) throws SQLException {
+    public DatabaseManager(String path, SimpleGroups plugin) throws SQLException {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
+        this.plugin = plugin;
 
         try (Statement statement = connection.createStatement()) {
             // store unique names
@@ -190,7 +194,7 @@ public class DatabaseManager {
         }
 
         try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT OR REPLACE INTO player_groups (uuid, group_name) VALUES (?, ?, ?)")) {
+                "INSERT OR REPLACE INTO player_groups (uuid, group_name, expiration_time) VALUES (?, ?, ?)")) {
             statement.setString(1, uuid.toString());
             statement.setString(2, groupName);
             statement.setLong(3, time);
@@ -211,6 +215,21 @@ public class DatabaseManager {
             }
         }
         return null; // No group found
+    }
+
+    public SimplePlayer loadPlayer(String uuid) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT * FROM player_groups WHERE uuid = ?"
+        )) {
+            statement.setString(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                String groupName = resultSet.getString("group_name");
+                long expirationTime = resultSet.getLong("expiration_time");
+                return new SimplePlayer(UUID.fromString(uuid), plugin.getGroup(groupName), expirationTime);
+            }
+        }
+        return null;
     }
 
     /**

@@ -24,3 +24,4 @@ messages:
   group-changed: "Your group has been changed to {group}."
   cannot-delete-default: "You cannot delete the default rank!"
   delete-group: "Successfully deleted {group}. All members have been put in default group."
+  expired-group: "Your previous group: {group} is now expired."
