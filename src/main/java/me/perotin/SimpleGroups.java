@@ -7,6 +7,7 @@ import me.perotin.events.SimpleJoinEvent;
 import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -184,6 +185,12 @@ public class SimpleGroups extends JavaPlugin {
     public interface PlayerCallback {
         void onResult(SimplePlayer player, boolean fromMemory);
     }
+
+    public String getMessage(String path) {
+        return ChatColor.translateAlternateColorCodes('&', getConfig().getString(path, "Messages not found in SimpleGroups/config.yml"));
+    }
+
+
 
 
 

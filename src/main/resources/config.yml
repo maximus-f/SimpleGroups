@@ -21,3 +21,4 @@ messages:
   permission-added: "Permission {permission} has been added to group {group}."
   permission-removed: "Permission {permission} has been removed from group {group}."
   permission-not-found: "Permission {permission} not found in group {group}."
+  group-changed: "Your group has been changed to {group}."

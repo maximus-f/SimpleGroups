@@ -23,7 +23,7 @@ public class SimplePlayer {
     private UUID playerUUID;
     @Setter
     private PermissionAttachment permissionAttachment;
-    private final PermissionGroup group;
+    private PermissionGroup group;
     private final long expirationTime;
 
 
@@ -47,6 +47,17 @@ public class SimplePlayer {
         return expirationTime > 0;
     }
 
+    /**
+     *  Changes group of a player. Clears old PermissionAttachment and updates with new permissions.
+     * @param group
+     */
+    public void setGroup(PermissionGroup group, Player player, SimpleGroups plugin) {
+        this.group = group;
+        PermissionAttachment newAttachment = player.addAttachment(plugin);
+        player.removeAttachment(getPermissionAttachment());
+        setPermissionAttachment(newAttachment);
+        setPermissions(plugin);
+    }
 
     public boolean isExpired() {
         return isTemporary() && System.currentTimeMillis() > expirationTime;

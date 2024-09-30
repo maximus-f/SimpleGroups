@@ -46,8 +46,11 @@ public class SetPlayerGroupCommand implements SubCommand {
             }
 
             UUID playerUUID = targetPlayer.getUniqueId();
-            SimplePlayer simplePlayer = new SimplePlayer(playerUUID, group, 0, targetPlayer.addAttachment(plugin)); // No expiration for now
-            plugin.addPlayer(simplePlayer);
+            plugin.getPlayer(playerUUID, (player, fromMemory) -> {
+                player.setGroup(group, targetPlayer, plugin);
+                targetPlayer.sendMessage(plugin.getMessage("messages.group-changed")
+                        .replace("{group}", group.getName()));
+            });
 
             // Run on the main thread to send the message back
             Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(plugin.getConfig().getString("messages.player-added")
