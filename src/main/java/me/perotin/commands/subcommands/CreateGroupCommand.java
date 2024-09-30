@@ -25,8 +25,8 @@ public class CreateGroupCommand implements SubCommand {
         }
 
         String groupName = args[1];
-        String inheritGroup = args.length > 2 ? args[2] : null;
-        PermissionGroup newGroup = new PermissionGroup(groupName, "prefix_" + groupName);
+        String prefix = args[2];
+        PermissionGroup newGroup = new PermissionGroup(groupName, prefix);
 
         plugin.addGroup(newGroup, true);
         sender.sendMessage(plugin.getConfig().getString("messages.group-created").replace("{group}", groupName));

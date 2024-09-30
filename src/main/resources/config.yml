@@ -3,7 +3,7 @@
 
 default-prefix: "&7[Default]&f "
 
-
+join-message: "{prefix} {name} has joined the server!"
 
 messages:
   only-players: "Only players can use this command."

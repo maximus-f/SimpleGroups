@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 
@@ -26,37 +27,33 @@ public class SimplePlayer {
     private PermissionGroup group;
     private final long expirationTime;
 
-
-    /**
-     * Offline player constructor
-     */
+    // PermissionAttachment is set on setPermissions
     public SimplePlayer(UUID playerUUID, PermissionGroup group, long expirationTime) {
         this.playerUUID = playerUUID;
         this.group = group;
         this.expirationTime = expirationTime;
     }
 
-    public SimplePlayer(UUID playerUUID, PermissionGroup group, long expirationTime, PermissionAttachment permissionAttachment) {
-        this.playerUUID = playerUUID;
-        this.group = group;
-        this.expirationTime = expirationTime;
-        this.permissionAttachment = permissionAttachment;
-    }
 
     public boolean isTemporary() {
         return expirationTime > 0;
     }
 
     /**
-     *  Changes group of a player. Clears old PermissionAttachment and updates with new permissions.
+     *  Changes group of a player. Clears old PermissionAttachment and updates with new permissions and
+     *  writes to database.
      * @param group
      */
     public void setGroup(PermissionGroup group, Player player, SimpleGroups plugin) {
         this.group = group;
-        PermissionAttachment newAttachment = player.addAttachment(plugin);
         player.removeAttachment(getPermissionAttachment());
-        setPermissionAttachment(newAttachment);
         setPermissions(plugin);
+        try {
+            plugin.getDatabaseManager().assignPlayerToGroup(getPlayerUUID(), group.getName());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public boolean isExpired() {
@@ -76,6 +73,7 @@ public class SimplePlayer {
                 for (String permission : group.getPermissions()) {
                     attachment.setPermission(permission, true);
                 }
+                setPermissionAttachment(attachment);
             }
         }
     }

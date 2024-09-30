@@ -76,15 +76,17 @@ public class DatabaseManager {
         List<PermissionGroup> permissionGroups = new ArrayList<>();
         // Select all unique names from group_names
         try (PreparedStatement groupNameStatement = connection.prepareStatement(
-                "SELECT group_name FROM group_names"
+                "SELECT group_name, group_prefix FROM group_names"
         )) {
             ResultSet groupNameResultSet = groupNameStatement.executeQuery();
 
             while (groupNameResultSet.next()) {
                 String groupName = groupNameResultSet.getString("group_name");
+                String groupPrefix = groupNameResultSet.getString("group_prefix");
+
                 // Fetch permissions per group
                 List<String> permissions = getGroupPermissions(groupName);
-                PermissionGroup permissionGroup = new PermissionGroup(groupName, "prefix_" + groupName);  // Assuming you handle prefix separately
+                PermissionGroup permissionGroup = new PermissionGroup(groupName, groupPrefix);
                 permissionGroup.addAllPermissions(permissions);
                 permissionGroups.add(permissionGroup);
             }
