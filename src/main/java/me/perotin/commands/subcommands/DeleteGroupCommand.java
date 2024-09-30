@@ -29,6 +29,8 @@ public class DeleteGroupCommand implements SubCommand {
                 sender.sendMessage(plugin.getMessage("messages.cannot-delete-default"));
                 return;
             }
+            sender.sendMessage(plugin.getMessage("messages.delete-group")
+                    .replace("{group}", group.getName()));
             plugin.removeGroup(group);
         }
     }

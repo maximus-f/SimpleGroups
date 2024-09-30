@@ -23,3 +23,4 @@ messages:
   permission-not-found: "Permission {permission} not found in group {group}."
   group-changed: "Your group has been changed to {group}."
   cannot-delete-default: "You cannot delete the default rank!"
+  delete-group: "Successfully deleted {group}. All members have been put in default group."

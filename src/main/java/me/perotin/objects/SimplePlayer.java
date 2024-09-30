@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import me.perotin.SimpleGroups;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -26,7 +25,7 @@ public class SimplePlayer {
     @Setter
     private PermissionAttachment permissionAttachment;
     private PermissionGroup group;
-    private final long expirationTime;
+    private long expirationTime; // -1 if permanent.
 
     // PermissionAttachment is set on setPermissions
     public SimplePlayer(UUID playerUUID, PermissionGroup group, long expirationTime) {
@@ -45,8 +44,9 @@ public class SimplePlayer {
      *  writes to database.
      * @param group
      */
-    public void setGroup(PermissionGroup group, Player player, SimpleGroups plugin) {
+    public void setGroup(PermissionGroup group, Player player, SimpleGroups plugin, long expirationTime) {
         this.group = group;
+        this.expirationTime = expirationTime;
         if (player != null) {
             player.removeAttachment(getPermissionAttachment());
         } else {

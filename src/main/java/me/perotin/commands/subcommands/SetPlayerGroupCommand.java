@@ -8,8 +8,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SetPlayerGroupCommand implements SubCommand {
 
@@ -35,8 +38,19 @@ public class SetPlayerGroupCommand implements SubCommand {
                     .replace("{group}", groupName));
             return;
         }
+        Duration duration = null;
+        if (args.length >= 4) {
+            try {
+                duration = parseDuration(args[3]);
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage("Invalid time format. Use 4d3h2m30s as an example.");
+                return;
+            }
+        }
+
 
         // Run async task for setting another player's group
+        Duration finalDuration = duration;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             Player targetPlayer = Bukkit.getPlayer(playerName);
             if (targetPlayer == null) {
@@ -47,7 +61,9 @@ public class SetPlayerGroupCommand implements SubCommand {
 
             UUID playerUUID = targetPlayer.getUniqueId();
             plugin.getPlayer(playerUUID, (player, fromMemory) -> {
-                player.setGroup(group, targetPlayer, plugin);
+                long expirationTime = (finalDuration != null) ? System.currentTimeMillis() + finalDuration.toMillis() : -1;
+
+                player.setGroup(group, targetPlayer, plugin, expirationTime);
                 targetPlayer.sendMessage(plugin.getMessage("messages.group-changed")
                         .replace("{group}", group.getName()));
             });
@@ -57,5 +73,29 @@ public class SetPlayerGroupCommand implements SubCommand {
                     .replace("{player}", playerName)
                     .replace("{group}", groupName)));
         });
+    }
+
+    // Regex parser for duration in format: 4d3h2m30s -> 4 days, 3 hours, 2 minutes and 30 seconds.
+    private Duration parseDuration(String time) {
+        Pattern pattern = Pattern.compile("(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?");
+        Matcher matcher = pattern.matcher(time);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid time format");
+        }
+
+        int days = parseValue(matcher.group(1));
+        int hours = parseValue(matcher.group(2));
+        int minutes = parseValue(matcher.group(3));
+        int seconds = parseValue(matcher.group(4));
+
+        return Duration.ofDays(days).plusHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+    }
+
+    // Fetch the numeric value per unit of time
+    private int parseValue(String group) {
+        if (group == null || group.isEmpty()) {
+            return 0;
+        }
+        return Integer.parseInt(group.substring(0, group.length() - 1));  // Remove the time unit (e.g., 'd', 'h')
     }
 }

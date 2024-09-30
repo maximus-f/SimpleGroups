@@ -103,7 +103,7 @@ public class SimpleGroups extends JavaPlugin {
      */
     public void removeGroup(PermissionGroup group) {
         // Reassign members in memory to default rank
-        getPlayersWithRank(group).forEach(simplePlayer -> simplePlayer.setGroup(getGroup("default"), Bukkit.getPlayer(simplePlayer.getPlayerUUID()), this));
+        getPlayersWithRank(group).forEach(simplePlayer -> simplePlayer.setGroup(getGroup("default"), Bukkit.getPlayer(simplePlayer.getPlayerUUID()), this, -1));
         groups.remove(group.getName());
 
         try {
