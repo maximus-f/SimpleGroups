@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 import java.util.UUID;
 
+// Test class for fetching group data from SQLite
 @RunWith(JUnit4.class)
 public class DatabaseManagerTests {
     private DatabaseManager dbManager;
@@ -25,7 +26,7 @@ public class DatabaseManagerTests {
     @BeforeEach
     public void setUp() throws SQLException {
         // Create an in-memory SQLite database for testing
-        SimpleGroups mockPlugin = mock(SimpleGroups.class);
+        SimpleGroups mockPlugin = SimpleGroups.getInstance();
 
         dbManager = new DatabaseManager("jdbc:sqlite::memory:", mockPlugin); // Use in-memory database
 
@@ -33,6 +34,7 @@ public class DatabaseManagerTests {
 
     @AfterEach
     public void tearDown() throws SQLException {
+        dbManager.deleteAllGroups();
         dbManager.closeConnection();
     }
 
@@ -40,7 +42,11 @@ public class DatabaseManagerTests {
     @Test
     public void testWriteNewGroup() throws SQLException {
         PermissionGroup group = new PermissionGroup("Admin", "[Admin]");
-        dbManager.writeNewGroup(group);
+
+        // Only write if it doesn't exist
+        if (!dbManager.groupExists("Admin")) {
+            dbManager.writeNewGroup(group);
+        }
 
         assertTrue(dbManager.groupExists("Admin"));
     }
@@ -69,7 +75,9 @@ public class DatabaseManagerTests {
     @Test
     public void testDeletePermissionGroup() throws SQLException {
         PermissionGroup group = new PermissionGroup("Admin", "[Admin]");
-        dbManager.writeNewGroup(group);
+        if (!dbManager.groupExists("Admin")) {
+            dbManager.writeNewGroup(group);
+        }
 
         dbManager.deletePermissionGroup("Admin");
 

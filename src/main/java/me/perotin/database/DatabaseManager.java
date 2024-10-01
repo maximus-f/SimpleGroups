@@ -19,6 +19,7 @@ import java.util.UUID;
 
     Group_names (used as super list for getAll):
         Group_Name:
+        Group_Prefix
      Groups:
         Group Name
         Permission
@@ -66,11 +67,23 @@ public class DatabaseManager {
      * @throws SQLException
      */
     public void writeNewGroup(PermissionGroup group) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO group_names(group_name, group_prefix) VALUES(?, ?)")) {
-            statement.setString(1, group.getName());
-            statement.setString(2, group.getPrefix());
-            statement.executeUpdate();
+        if (!groupExists(group.getName())) {
+            try (PreparedStatement statement = connection.prepareStatement("INSERT INTO group_names(group_name, group_prefix) VALUES(?, ?)")) {
+                statement.setString(1, group.getName());
+                statement.setString(2, group.getPrefix());
+                statement.executeUpdate();
 
+            }
+        }
+    }
+
+    /**
+     *  Deletes entire database. Used for cleanup in db testing.
+     * @throws SQLException
+     */
+    public void deleteAllGroups() throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM group_names")) {
+            statement.executeUpdate();
         }
     }
     /**

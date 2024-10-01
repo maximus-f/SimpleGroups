@@ -1,6 +1,7 @@
 package me.perotin;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.perotin.commands.SimpleGroupsCommand;
 import me.perotin.database.DatabaseManager;
 import me.perotin.events.SignWriteEvent;
@@ -20,9 +21,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/*
- TODO
- */
 public class SimpleGroups extends JavaPlugin {
 
     // Use Maps for faster #get retrievals
@@ -30,16 +28,22 @@ public class SimpleGroups extends JavaPlugin {
     @Getter
     private Map<UUID, SimplePlayer> players;
 
+    @Setter
     @Getter
-    private DatabaseManager databaseManager; // SQLite db
+    private DatabaseManager databaseManager; // SQLite db, Setter is for Unit testing
 
     @Getter
     private FileConfiguration messagesConfig;
     @Getter
     private String lang;
 
+    // Only used for unit testing
+    @Getter
+    private static SimpleGroups instance;
+
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
         this.lang = getConfig().getString("lang");
         loadMessages();
