@@ -26,13 +26,26 @@ public class SimpleJoinEvent implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
+        if (!joiner.hasPlayedBefore()) {
+            // First time, set to default and return
+           SimplePlayer firstTimer =  new SimplePlayer(joiner.getUniqueId(), plugin.getGroup("default"), -1);
+           firstTimer.setPermissions(plugin);
+           String joinMsg = ChatColor.translateAlternateColorCodes('&', plugin.getMessage("messages.join-message")
+                    .replace("{prefix}", firstTimer.getGroup().getPrefix())
+                    .replace("{name}", joiner.getName()));
+            event.setJoinMessage(ChatColor.translateAlternateColorCodes('&',joinMsg));
+            plugin.getPlayers().put(joiner.getUniqueId(), firstTimer);
+            createOrUpdateTeamForPlayer(joiner, firstTimer);
+            joiner.setPlayerListName(ChatColor.translateAlternateColorCodes('&', firstTimer.getGroup().getPrefix() + " " + joiner.getName()));
+            return;
+        }
+
         plugin.getPlayer(joiner.getUniqueId(), (simplePlayer, fromMemory) -> {
-            if (simplePlayer != null) Bukkit.broadcastMessage("PLAYER NOT NULL!");
 
-            if (!fromMemory) {
-                simplePlayer.setPermissions(plugin);
+            // Always need to set perms since its new player obj on join
+            simplePlayer.setPermissions(plugin);
 
-            }
+
             String joinMsg = ChatColor.translateAlternateColorCodes('&', plugin.getMessage("messages.join-message")
                     .replace("{prefix}", simplePlayer.getGroup().getPrefix())
                     .replace("{name}", joiner.getName()));

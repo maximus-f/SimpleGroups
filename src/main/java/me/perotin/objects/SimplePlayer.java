@@ -54,12 +54,10 @@ public class SimplePlayer {
         if (player != null && !player.getEffectivePermissions().isEmpty()) {
 
             player.getEffectivePermissions().forEach(permissionAttachmentInfo -> {
-                Bukkit.broadcastMessage(permissionAttachmentInfo.getPermission() + " found in clearPerm");
                 if (permissionAttachmentInfo.getAttachment() != null) {
                     toRemove.add(permissionAttachmentInfo.getAttachment());
                 }
             });
-            toRemove.forEach(perm -> Bukkit.broadcastMessage(perm.toString()));
             for (PermissionAttachment attachment : toRemove) {
                 attachment.getPermissions().keySet().forEach(Bukkit::broadcastMessage);
                 player.removeAttachment(attachment);
@@ -135,11 +133,8 @@ public class SimplePlayer {
         PermissionAttachment attachment = getPermissionAttachment();
             if (attachment != null) {
                 if (add) {
-                    Bukkit.broadcastMessage("Adding new permission: " + permission + " to " + getGroup().getName());
                     attachment.setPermission(permission, true);
                 } else {
-                    Bukkit.broadcastMessage("Removing new permission: " + permission + " from " + getGroup().getName());
-
                     attachment.unsetPermission(permission);
             }
         } else {
