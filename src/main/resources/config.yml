@@ -5,5 +5,7 @@ default-prefix: "&7[Default]&f "
 # Supported languages: en, de. See /lang folder for messages.
 lang: "de"
 
+chat-format: "{prefix} {name}&f:&e {message"
+
 
 
