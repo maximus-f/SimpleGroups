@@ -18,3 +18,4 @@ messages:
   cannot-delete-default: "Sie können die Standardgruppe nicht löschen!"
   delete-group: "Gruppe {group} erfolgreich gelöscht. Alle Mitglieder wurden in die Standardgruppe versetzt."
   expired-group: "Ihre vorherige Gruppe: {group} ist jetzt abgelaufen."
+  join-message: "{prefix} {group} &eist dem Server beigetreten"
