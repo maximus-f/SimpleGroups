@@ -37,7 +37,7 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         subCommands.put("setpermission", new SetPermissionSubCommand(plugin));
         subCommands.put("deletegroup", new DeleteGroupCommand(plugin));
         subCommands.put("listgroups", new ListGroupsCommand(plugin));
-
+        subCommands.put("listpermissions", new ListPermissionsSubcommand(plugin));
     }
 
 
@@ -47,6 +47,7 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         /sg setpermission <group> <permission> <optional: true/false> - Set group permission, simplegroup.admin
         /sg setplayer <group-name> <player-name> <optional: time> - Add player to group, simplegroup.admin
         /sg deletegroup <group>
+        /sg listgroup <group/player>
         /sg - Displays current group and time remaining if applicable, no permission
 
      */
@@ -98,6 +99,12 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
             commandSender.sendMessage("/sg setplayer <group-name> <player-name> <optional: time>");
             commandSender.sendMessage("/sg deletegroup <group>");
             commandSender.sendMessage("/sg listgroups");
+            commandSender.sendMessage("/sg listpermissions <player/group>");
+        }
+        if (args[0].equalsIgnoreCase("listpermissions") && hasPerms) {
+            subCommands.get("listpermissions").execute(commandSender, args);
+            return true;
+
         }
         if (args[0].equalsIgnoreCase("listgroups") && hasPerms) {
             subCommands.get("listgroups").execute(commandSender, args);

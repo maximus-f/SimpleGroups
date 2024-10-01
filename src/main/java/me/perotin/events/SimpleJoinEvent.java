@@ -27,8 +27,11 @@ public class SimpleJoinEvent implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player joiner = event.getPlayer();
         plugin.getPlayer(joiner.getUniqueId(), (simplePlayer, fromMemory) -> {
+            if (simplePlayer != null) Bukkit.broadcastMessage("PLAYER NOT NULL!");
+
             if (!fromMemory) {
                 simplePlayer.setPermissions(plugin);
+
             }
             String joinMsg = ChatColor.translateAlternateColorCodes('&', plugin.getMessage("messages.join-message")
                     .replace("{prefix}", simplePlayer.getGroup().getPrefix())
@@ -42,7 +45,7 @@ public class SimpleJoinEvent implements Listener {
     }
 
     // Fetch main scoreboard and register team with prefix as group prefix
-    private void createOrUpdateTeamForPlayer(Player target, SimplePlayer player) {
+    public static void createOrUpdateTeamForPlayer(Player target, SimplePlayer player) {
         PermissionGroup group = player.getGroup();
         String prefix = group.getPrefix();
         String teamName = group.getName();

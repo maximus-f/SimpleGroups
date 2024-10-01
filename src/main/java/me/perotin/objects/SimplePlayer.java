@@ -3,12 +3,16 @@ package me.perotin.objects;
 import lombok.Getter;
 import lombok.Setter;
 import me.perotin.SimpleGroups;
+import me.perotin.events.SimpleJoinEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.checkerframework.checker.units.qual.A;
 
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -40,6 +44,31 @@ public class SimplePlayer {
     }
 
     /**
+     *  Remove all permission attachment of a Player object
+     * @param uuid
+     */
+    public void clearPermissionFromPlayer(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        Set<PermissionAttachment> toRemove = new HashSet<>();
+
+        if (player != null && !player.getEffectivePermissions().isEmpty()) {
+
+            player.getEffectivePermissions().forEach(permissionAttachmentInfo -> {
+                Bukkit.broadcastMessage(permissionAttachmentInfo.getPermission() + " found in clearPerm");
+                if (permissionAttachmentInfo.getAttachment() != null) {
+                    toRemove.add(permissionAttachmentInfo.getAttachment());
+                }
+            });
+            toRemove.forEach(perm -> Bukkit.broadcastMessage(perm.toString()));
+            for (PermissionAttachment attachment : toRemove) {
+                attachment.getPermissions().keySet().forEach(Bukkit::broadcastMessage);
+                player.removeAttachment(attachment);
+            }
+
+        }
+    }
+
+    /**
      *  Changes group of a player. Clears old PermissionAttachment and updates with new permissions and
      *  writes to database.
      * @param group
@@ -48,7 +77,8 @@ public class SimplePlayer {
         this.group = group;
         this.expirationTime = expirationTime;
         if (player != null) {
-            player.removeAttachment(getPermissionAttachment());
+            // Clear all permissions since will be using new one.
+            clearPermissionFromPlayer(player.getUniqueId());
         } else {
             /*
                 Can occur if group of offline player gets deleted. In this case, unload object
@@ -57,6 +87,10 @@ public class SimplePlayer {
             unload(plugin);
         }
         setPermissions(plugin);
+        // TODO this should be refactored to be static member of utility class.
+        SimpleJoinEvent.createOrUpdateTeamForPlayer(player, this);
+        player.setPlayerListName(ChatColor.translateAlternateColorCodes('&', getGroup().getPrefix() + " " + player.getName()));
+
         try {
             plugin.getDatabaseManager().assignPlayerToGroup(getPlayerUUID(), group.getName(), expirationTime);
         } catch (SQLException e) {
@@ -77,6 +111,7 @@ public class SimplePlayer {
     public void setPermissions(SimpleGroups plugin){
         if (Bukkit.getPlayer(playerUUID) != null) {
             Player p = Bukkit.getPlayer(playerUUID);
+            clearPermissionFromPlayer(p.getUniqueId()); // Adding just in case
             if (p != null) {
                 PermissionAttachment attachment = p.addAttachment(plugin);
                 for (String permission : group.getPermissions()) {
@@ -100,8 +135,11 @@ public class SimplePlayer {
         PermissionAttachment attachment = getPermissionAttachment();
             if (attachment != null) {
                 if (add) {
+                    Bukkit.broadcastMessage("Adding new permission: " + permission + " to " + getGroup().getName());
                     attachment.setPermission(permission, true);
                 } else {
+                    Bukkit.broadcastMessage("Removing new permission: " + permission + " from " + getGroup().getName());
+
                     attachment.unsetPermission(permission);
             }
         } else {
