@@ -1,10 +1,7 @@
 package me.perotin.commands;
 
 import me.perotin.SimpleGroups;
-import me.perotin.commands.subcommands.CreateGroupCommand;
-import me.perotin.commands.subcommands.DeleteGroupCommand;
-import me.perotin.commands.subcommands.SetPermissionSubCommand;
-import me.perotin.commands.subcommands.SetPlayerGroupCommand;
+import me.perotin.commands.subcommands.*;
 import me.perotin.objects.PermissionGroup;
 import me.perotin.objects.SimplePlayer;
 import org.bukkit.Bukkit;
@@ -39,13 +36,14 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         subCommands.put("setplayer", new SetPlayerGroupCommand(plugin));
         subCommands.put("setpermission", new SetPermissionSubCommand(plugin));
         subCommands.put("deletegroup", new DeleteGroupCommand(plugin));
+        subCommands.put("listgroups", new ListGroupsCommand(plugin));
 
     }
 
 
     /*
         Command layout : /simplegroups /sg
-        /sg create <group-name> <optional: inherit> <optional: name> - Create group, simplegroups.admin
+        /sg create <group-name> > <prefix> - Create group, simplegroups.admin
         /sg setpermission <group> <permission> <optional: true/false> - Set group permission, simplegroup.admin
         /sg setplayer <group-name> <player-name> <optional: time> - Add player to group, simplegroup.admin
         /sg deletegroup <group>
@@ -75,6 +73,9 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
                     commandSender.sendMessage(plugin.getMessage("messages.current-group")
                             .replace("{group}", simplePlayer.getGroup().getName())
                             .replace("{time}", timeRemainingString));
+                    if (commandSender.isOp() || commandSender.hasPermission("simpleplayer.admin")) {
+                        commandSender.sendMessage(plugin.getMessage("messages.helpguide"));
+                    }
 
                 } else {
                     if (simplePlayer.getGroup() != null && simplePlayer.isExpired()) {
@@ -91,6 +92,18 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         }
 
         boolean hasPerms = commandSender.isOp() || commandSender.hasPermission("simplegroups.admin");
+        if (args[0].equalsIgnoreCase("help") && hasPerms) {
+            commandSender.sendMessage("/sg create <group-name> > <prefix> - Create group");
+            commandSender.sendMessage("/sg setpermission <group> <permission> <true/false> ");
+            commandSender.sendMessage("/sg setplayer <group-name> <player-name> <optional: time>");
+            commandSender.sendMessage("/sg deletegroup <group>");
+            commandSender.sendMessage("/sg listgroups");
+        }
+        if (args[0].equalsIgnoreCase("listgroups") && hasPerms) {
+            subCommands.get("listgroups").execute(commandSender, args);
+            return true;
+
+        }
         if (args[0].equalsIgnoreCase("creategroup") && hasPerms) {
             subCommands.get("creategroup").execute(commandSender, args);
             return true;

@@ -1,5 +1,6 @@
 messages:
   only-players: "Only players can use this command."
+  helpguide: "To see the help guide, please type /sg help"
   join-message: "{prefix} {name}&e has joined the server!"
   current-group: "Your current group: {group}, Time remaining: {time}"
   no-time: "None"
@@ -19,3 +20,4 @@ messages:
   cannot-delete-default: "You cannot delete the default rank!"
   delete-group: "Successfully deleted {group}. All members have been put in default group."
   expired-group: "Your previous group: {group} is now expired."
+

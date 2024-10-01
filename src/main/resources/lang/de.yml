@@ -1,5 +1,6 @@
 messages:
   only-players: "Nur Spieler können diesen Befehl verwenden."
+  helpguide: "Um die Hilfe anzuzeigen, geben Sie bitte /sg help."
   current-group: "Ihre aktuelle Gruppe: {group}, Verbleibende Zeit: {time}"
   no-time: "Keine"
   no-group: "Sie sind derzeit in keiner Gruppe."

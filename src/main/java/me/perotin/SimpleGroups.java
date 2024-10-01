@@ -57,6 +57,9 @@ public class SimpleGroups extends JavaPlugin {
         // TODO: Add code here to function with /reload commands (players found on start up)
     }
 
+    public Map<String, PermissionGroup> getGroups() {
+        return groups;
+    }
 
     @Override
     public void onDisable() {
