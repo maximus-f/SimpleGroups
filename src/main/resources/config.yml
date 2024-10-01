@@ -2,27 +2,8 @@
 
 
 default-prefix: "&7[Default]&f "
-# Supported languages: en, de
+# Supported languages: en, de. See /lang folder for messages.
 lang: "de"
 
 
-messages:
-  only-players: "Only players can use this command."
-  current-group: "Your current group: {group}, Time remaining: {time}"
-  no-time: "None"
-  no-group: "You are not in any group currently."
-  usage-create: "Usage: /sg create <group-name> <optional: inherit> <optional: name>"
-  group-created: "Group {group} created successfully."
-  usage-setplayer: "Usage: /sg setplayer <group-name> <player-name>"
-  group-not-exist: "Group {group} does not exist."
-  player-not-online: "Player {player} is not online."
-  player-added: "{player} has been added to group {group}."
-  unknown-command: "Unknown command. Use /sg create or /sg setplayer."
-  usage-setpermission: "Usage: /sg setpermission <group> <permission> <optional: true/false>"
-  permission-added: "Permission {permission} has been added to group {group}."
-  permission-removed: "Permission {permission} has been removed from group {group}."
-  permission-not-found: "Permission {permission} not found in group {group}."
-  group-changed: "Your group has been changed to {group}."
-  cannot-delete-default: "You cannot delete the default rank!"
-  delete-group: "Successfully deleted {group}. All members have been put in default group."
-  expired-group: "Your previous group: {group} is now expired."
+
