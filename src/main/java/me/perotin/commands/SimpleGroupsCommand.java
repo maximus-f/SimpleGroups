@@ -164,6 +164,19 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        if (args.length == 1) {
+            List<String> suggestions = Arrays.asList("creategroup", "setplayer", "setpermission", "deletegroup", "listgroups", "listpermissions", "help");
+            return filterSuggestions(args[0], suggestions);
+        }
+    return null;
+    }
+    private List<String> filterSuggestions(String input, List<String> options) {
+        List<String> filtered = new ArrayList<>();
+        for (String option : options) {
+            if (option.toLowerCase().startsWith(input.toLowerCase())) {
+                filtered.add(option);
+            }
+        }
+        return filtered;
     }
 }
