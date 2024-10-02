@@ -4,6 +4,7 @@ import me.perotin.SimpleGroups;
 import me.perotin.commands.SubCommand;
 import org.bukkit.command.CommandSender;
 
+
 public class ListGroupsCommand implements SubCommand {
 
     private SimpleGroups plugin;

@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.entity.Player;
 
+// Listener for setting chat prefix
 public class SimpleChatEvent implements Listener {
 
     private final SimpleGroups plugin;

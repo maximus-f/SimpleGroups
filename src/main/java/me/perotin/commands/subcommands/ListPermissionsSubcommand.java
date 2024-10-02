@@ -11,6 +11,7 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import java.util.List;
 import java.util.Set;
 
+// Subcommand for listing all permissions of a group or player
 public class ListPermissionsSubcommand implements SubCommand {
 
     private final SimpleGroups plugin;
@@ -22,7 +23,7 @@ public class ListPermissionsSubcommand implements SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("Usage: /sg listpermissions <group|player>");
+            sender.sendMessage("/sg listpermissions <group|player>");
             return;
         }
 

@@ -47,7 +47,8 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         /sg setpermission <group> <permission> <optional: true/false> - Set group permission, simplegroup.admin
         /sg setplayer <group-name> <player-name> <optional: time> - Add player to group, simplegroup.admin
         /sg deletegroup <group>
-        /sg listgroup <group/player>
+        /sg listgroups
+        /sg listpermissions <group/player>
         /sg - Displays current group and time remaining if applicable, no permission
 
      */
