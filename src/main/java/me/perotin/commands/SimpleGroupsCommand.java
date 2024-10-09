@@ -38,6 +38,8 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
         subCommands.put("deletegroup", new DeleteGroupCommand(plugin));
         subCommands.put("listgroups", new ListGroupsCommand(plugin));
         subCommands.put("listpermissions", new ListPermissionsSubcommand(plugin));
+        subCommands.put("help", new HelpCommand());
+        subCommands.put("informational", new InformationalCommand(plugin));
     }
 
 
@@ -58,107 +60,25 @@ public class SimpleGroupsCommand implements CommandExecutor, TabCompleter {
             commandSender.sendMessage(plugin.getMessage("messages.only-players"));
             return true;
         }
-
         if (args.length == 0) {
-            // Display current group for the player
-            UUID playerUUID = ((Player) commandSender).getUniqueId();
-            Player player = Bukkit.getPlayer(playerUUID);
-
-            plugin.getPlayer(playerUUID, (simplePlayer, fromMemory) -> {
-                if (simplePlayer != null && !simplePlayer.isExpired()) {
-                    long timeRemaining = simplePlayer.isTemporary()
-                            ? (simplePlayer.getExpirationTime() - System.currentTimeMillis())
-                            : -1;
-
-                    String timeRemainingString = timeRemaining > 0 ? formatTime(timeRemaining) : plugin.getMessage("messages.no-time");
-
-                    commandSender.sendMessage(plugin.getMessage("messages.current-group")
-                            .replace("{group}", simplePlayer.getGroup().getName())
-                            .replace("{time}", timeRemainingString));
-                    if (commandSender.isOp() || commandSender.hasPermission("simpleplayer.admin")) {
-                        commandSender.sendMessage(plugin.getMessage("messages.helpguide"));
-                    }
-
-                } else {
-                    if (simplePlayer.getGroup() != null && simplePlayer.isExpired()) {
-                        commandSender.sendMessage(plugin.getMessage("messages.expired-group")
-                                .replace("{group}", simplePlayer.getGroup().getName()));
-                        simplePlayer.setGroup(plugin.getGroup("default"), player, plugin, -1);
-                    }  else {
-                        // This case should never happen but leaving it for now. Cleanup needed here most likely.
-                        commandSender.sendMessage(plugin.getMessage("messages.no-group"));
-                    }
-                }
-            });
-            return true;
+           subCommands.get("informational").execute(commandSender, args);
         }
 
         boolean hasPerms = commandSender.isOp() || commandSender.hasPermission("simplegroups.admin");
-        if (args[0].equalsIgnoreCase("help") && hasPerms) {
-            commandSender.sendMessage("/sg create <group-name> > <prefix> - Create group");
-            commandSender.sendMessage("/sg setpermission <group> <permission> <true/false> ");
-            commandSender.sendMessage("/sg setplayer <group-name> <player-name> <optional: time>");
-            commandSender.sendMessage("/sg deletegroup <group>");
-            commandSender.sendMessage("/sg listgroups");
-            commandSender.sendMessage("/sg listpermissions <player/group>");
-        }
-        if (args[0].equalsIgnoreCase("listpermissions") && hasPerms) {
-            subCommands.get("listpermissions").execute(commandSender, args);
+
+        if (subCommands.containsKey(args[0]) && hasPerms) {
+            subCommands.get(args[0]).execute(commandSender, args);
             return true;
 
         }
-        if (args[0].equalsIgnoreCase("listgroups") && hasPerms) {
-            subCommands.get("listgroups").execute(commandSender, args);
-            return true;
 
-        }
-        if (args[0].equalsIgnoreCase("creategroup") && hasPerms) {
-            subCommands.get("creategroup").execute(commandSender, args);
-            return true;
-
-        } else if (args[0].equalsIgnoreCase("setplayer") && hasPerms) {
-            // Set player to group
-          subCommands.get("setplayer").execute(commandSender, args);
-            return true;
-        } if (args[0].equalsIgnoreCase("setpermission") && hasPerms) {
-            // Set permission for a group
-          subCommands.get("setpermission").execute(commandSender, args);
-            return true;
-        } if (args[0].equalsIgnoreCase("deletegroup") && hasPerms) {
-            // Set permission for a group
-            subCommands.get("deletegroup").execute(commandSender, args);
-            return true;
-        }
 
 
         commandSender.sendMessage(plugin.getMessage("messages.unknown-command"));
         return false;
     }
 
-    // Format time excluding 0 values
-    private String formatTime(long millis) {
-        long seconds = millis / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
 
-        seconds %= 60;
-        minutes %= 60;
-        hours %= 24;
-
-        StringBuilder formattedTime = new StringBuilder();
-
-        if (days > 0) formattedTime.append(days).append(" days, ");
-        if (hours > 0) formattedTime.append(hours).append(" hours, ");
-        if (minutes > 0) formattedTime.append(minutes).append(" minutes, ");
-        if (seconds > 0) formattedTime.append(seconds).append(" seconds");
-
-        // Remove trailing commas and spaces
-        if (formattedTime.length() > 2 && formattedTime.charAt(formattedTime.length() - 2) == ',') {
-            formattedTime.setLength(formattedTime.length() - 2);
-        }
-        return formattedTime.toString();
-    }
 
 
 
